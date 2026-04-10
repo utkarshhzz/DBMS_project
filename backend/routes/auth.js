@@ -19,7 +19,7 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({error: "Invalid Credentials"});
   }
   const token = jwt.sign({id: user.rows[0].roll_no}, 'secret', {expiresIn: '1h'});
-  res.json({token});
+  res.json({token, rollNo: user.rows[0].roll_no, name: user.rows[0].name });
 });
 
 module.exports = router;

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage Applications</title>
+    
+    
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav">
+        <strong>TPO Manage Applications</strong>
+        <div>
+            <a href="admin-dashboard.html" style="color: white; margin-right: 15px;">Drives & Stats</a>
+            <a href="admin-manage.html" style="color: white; margin-right: 15px;">Manage Applications</a>
+            <a href="index.html" style="color: white;">Logout</a>
+        </div>
+    </div>
+
+    <h2>Student Applications</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Applied On</th>
+                <th>Current Status</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody id="appBody"></tbody>
+    </table>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        async function loadApps() {
+            const res = await fetch(`${API_URL}/admin/applications`);
+            const apps = await res.json();
+            const tbody = document.getElementById('appBody');
+            tbody.innerHTML = '';
+            apps.forEach(a => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${a.student_name}</td>
+                        <td>${a.roll_no}</td>
+                        <td>${a.company_name}</td>
+                        <td>${a.role}</td>
+                        <td>${new Date(a.applied_on).toLocaleDateString()}</td>
+                        <td><strong>${a.current_status}</strong></td>
+                        <td>
+                            <select id="status_${a.application_id}">
+                                <option value="Round 1 Cleared">Round 1 Cleared</option>
+                                <option value="Round 2 Cleared">Round 2 Cleared</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Offered">Offered</option>
+                            </select>
+                            <button onclick="updateStatus(${a.application_id})">Save</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateStatus(id) {
+            const status = document.getElementById('status_'+id).value;
+            try {
+                const res = await fetch(`${API_URL}/admin/application/${id}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status})
+                });
+                if(res.ok) {
+                    alert('Status Updated!');
+                    loadApps();
+                } else alert('Failed to update');
+            } catch(e) { alert('Internal Error'); }
+        }
+
+        loadApps();
+    </script>
+</body>
+</html>

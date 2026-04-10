@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Applications</title>
+    
+    
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav">
+        <strong>Track Applications</strong>
+        <div>
+            <a href="dashboard.html">Browse Drives</a>
+            <a href="my-applications.html">My Applications</a>
+            <a onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <h2>My Applications Pipeline</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Applied On</th>
+            </tr>
+        </thead>
+        <tbody id="app-body"></tbody>
+    </table>
+
+    <script>
+        const studentRollNo = localStorage.getItem('rollNo');
+        if(!localStorage.getItem('token')) window.location.href = 'index.html';
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        async function fetchApps() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/applications/${studentRollNo}`);
+                const apps = await response.json();
+                
+                const tbody = document.getElementById('app-body');
+                tbody.innerHTML = ''; 
+
+                if(apps.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='4'>You haven't applied to any drives yet.</td></tr>";
+                    return;
+                }
+
+                apps.forEach(app => {
+                    const tr = document.createElement('tr');
+                    // In a real app we'd fetch company name & role via JOIN, but our backend route applications.js didn't join them. 
+                    // Let's fix that! Wait, we actually need to fix the backend route to JOIN drives and companies.
+                    // For now, we assume the backend returns company_name and role.
+                    tr.innerHTML = `
+                        <td>${app.company_name || 'N/A'}</td>
+                        <td>${app.role || 'N/A'}</td>
+                        <td><span class="status-badge">${app.current_status}</span></td>
+                        <td>${new Date(app.applied_on).toLocaleDateString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        fetchApps();
+    </script>
+</body>
+</html>

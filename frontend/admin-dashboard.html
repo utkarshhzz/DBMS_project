@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    
+    
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav">
+        <strong>TPO Admin Dashboard</strong>
+        <div>
+            <a href="admin-dashboard.html" style="color: white; margin-right: 15px;">Drives & Stats</a>
+            <a href="admin-manage.html" style="color: white; margin-right: 15px;">Manage Applications</a>
+            <a href="index.html" style="color: white;">Logout</a>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h3>Create New Placement Drive</h3>
+            <div class="card">
+                <select id="companySelect">
+                    <option value="">Loading companies...</option>
+                </select>
+                <input type="text" id="dRole" placeholder="Role (e.g. SDE)" required>
+                <input type="number" id="dPackage" placeholder="Package LPA" step="0.1">
+                <input type="number" id="dMinCgpa" placeholder="Minimum CGPA" step="0.1">
+                <input type="text" id="dDepts" placeholder="Allowed Departments (e.g. All, CS, IT)">
+                <input type="date" id="dDeadline" required>
+                <button onclick="createDrive()">Create Drive</button>
+            </div>
+        </div>
+        <div style="flex: 2;">
+            <h3>Drive Statistics</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Applicants</th>
+                        <th>Offers</th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        async function loadCompanies() {
+            const res = await fetch(`${API_URL}/admin/companies`);
+            const companies = await res.json();
+            const select = document.getElementById('companySelect');
+            select.innerHTML = '<option value="">Select Company</option>';
+            companies.forEach(c => {
+                select.innerHTML += `<option value="${c.company_id}">${c.company_name} (${c.industry})</option>`;
+            });
+        }
+
+        async function createDrive() {
+            const data = {
+                companyId: document.getElementById('companySelect').value,
+                role: document.getElementById('dRole').value,
+                packageLpa: document.getElementById('dPackage').value,
+                minCgpa: document.getElementById('dMinCgpa').value,
+                allowedDepartments: document.getElementById('dDepts').value,
+                deadline: document.getElementById('dDeadline').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/admin/drive`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('Drive Created!');
+                    loadStats();
+                } else alert('Error creating drive');
+            } catch(e) { alert('Internal Error'); }
+        }
+
+        async function loadStats() {
+            const res = await fetch(`${API_URL}/admin/stats`);
+            const stats = await res.json();
+            const tbody = document.getElementById('statsBody');
+            tbody.innerHTML = '';
+            stats.forEach(s => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.company_name}</td>
+                        <td>${s.role}</td>
+                        <td>${s.total_applicants}</td>
+                        <td>${s.total_offers}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        loadCompanies();
+        loadStats();
+    </script>
+</body>
+</html>

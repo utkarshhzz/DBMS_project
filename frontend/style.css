@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-gray-50 text-gray-800 font-sans antialiased; }
+  h1, h2, h3 { @apply text-gray-900 font-bold mb-4; }
+  table { @apply w-full text-left border-collapse bg-white rounded-lg overflow-hidden shadow-sm; }
+  thead { @apply bg-gray-50; }
+  th { @apply text-gray-700 p-4 border-b font-semibold uppercase text-sm tracking-wider; }
+  td { @apply p-4 border-b border-gray-100 text-gray-600; }
+}
+
+@layer components {
+  .container { @apply max-w-lg mx-auto mt-12 p-8 bg-white rounded-2xl shadow-xl border border-gray-100; }
+  input, select { @apply w-full mb-4 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm; }
+  button { @apply w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md; }
+  .nav { @apply bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-4 shadow-lg flex flex-col md:flex-row justify-between items-center mb-8 px-8; }
+  .nav strong { @apply text-xl tracking-wide; }
+  .nav a { @apply text-blue-100 hover:text-white mx-3 cursor-pointer font-medium transition duration-150; }
+  .card { @apply bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500 mb-6 hover:shadow-lg transition duration-200; }
+  .apply-btn { @apply w-auto bg-green-500 hover:bg-green-600 px-6 py-2 rounded-lg text-white mt-4 shadow font-medium transition duration-200 block; }
+  .status-badge { @apply inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-100 text-blue-800 border border-blue-200; }
+  .switch { @apply text-blue-600 hover:text-blue-800 cursor-pointer block mt-4 text-center font-medium transition duration-150; }
+}

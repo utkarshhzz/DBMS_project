@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    
+    
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav">
+        <strong id="welcomeUser">Student Dashboard</strong>
+        <div>
+            <a href="dashboard.html">Browse Drives</a>
+            <a href="my-applications.html">My Applications</a>
+            <a onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <h2>Eligible Placement Drives</h2>
+    <div id="drives-container">Loading...</div>
+
+    <script>
+        const studentRollNo = localStorage.getItem('rollNo');
+        const token = localStorage.getItem('token');
+        
+        if(!token || !studentRollNo) {
+            window.location.href = 'index.html';
+        }
+        
+        document.getElementById('welcomeUser').textContent = 'Welcome, ' + localStorage.getItem('name');
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        async function fetchDrives() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/drives/eligible/${studentRollNo}`);
+                const drives = await response.json();
+                
+                const container = document.getElementById('drives-container');
+                container.innerHTML = ''; 
+
+                if(drives.length === 0) {
+                    container.innerHTML = "<p>No new eligible drives to apply for right now.</p>";
+                    return;
+                }
+
+                drives.forEach(drive => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${drive.company_name} - ${drive.role}</h3>
+                        <p><strong>Package:</strong> ${drive.package_lpa || 'TBD'} LPA | <strong>Deadline:</strong> ${new Date(drive.deadline).toLocaleDateString()}</p>
+                        <button class="apply-btn" onclick="applyForDrive(${drive.drive_id})">Apply Now</button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('drives-container').innerHTML = "<p>Error loading drives.</p>";
+            }
+        }
+
+        async function applyForDrive(driveId) {
+            try {
+                const response = await fetch('http://localhost:5000/api/applications/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNo: studentRollNo, driveId: driveId })
+                });
+
+                if(response.ok) {
+                    alert("Application Submitted!");
+                    fetchDrives(); 
+                }
+            } catch (error) {
+                alert("Failed to apply.");
+            }
+        }
+
+        fetchDrives();
+    </script>
+</body>
+</html>
