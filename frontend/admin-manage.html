@@ -2,70 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Manage Applications</title>
-    
-    
-
+    <title>Manage Candidates</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="nav">
-        <strong>TPO Manage Applications</strong>
+<body class="pt-24">
+    <div class="nav border-b border-indigo-500/30 shadow-[0_4px_30px_rgba(79,70,229,0.2)]">
+        <strong class="!from-indigo-400 !to-purple-500">TPO OVERSEER</strong>
         <div>
-            <a href="admin-dashboard.html" style="color: white; margin-right: 15px;">Drives & Stats</a>
-            <a href="admin-manage.html" style="color: white; margin-right: 15px;">Manage Applications</a>
-            <a href="index.html" style="color: white;">Logout</a>
+            <a href="admin-dashboard.html" class="hover:!text-indigo-300">Drives & Stats</a>
+            <a href="admin-manage.html" class="!text-indigo-400 font-bold">Manage Applications</a>
+            <a href="index.html" class="!text-red-400 hover:!text-red-300 ml-4">Terminal Exit</a>
         </div>
     </div>
 
-    <h2>Student Applications</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Student</th>
-                <th>Roll No</th>
-                <th>Company</th>
-                <th>Role</th>
-                <th>Applied On</th>
-                <th>Current Status</th>
-                <th>Update Status</th>
-            </tr>
-        </thead>
-        <tbody id="appBody"></tbody>
-    </table>
+    <div class="max-w-7xl mx-auto px-6 pb-12 relative z-10">
+        <h2 class="text-3xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-500 border-l-4 border-indigo-500 pl-3">Candidate Matrix</h2>
+        
+        <div class="glass-panel overflow-x-auto shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Candidate</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">ID</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Target Entity</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Role</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Timestamp</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Status Node</th>
+                        <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10 text-right">Admin Override</th>
+                    </tr>
+                </thead>
+                <tbody id="appBody" class="divide-y divide-white/5 text-gray-300">
+                    <tr>
+                        <td colspan="7" class="p-8 text-center text-indigo-300 animate-pulse tracking-widest text-sm">
+                            DOWNLOADING CANDIDATE RECORDS...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+    <script type="module">
+        import { initThreeBackground } from './three-bg.js';
+        initThreeBackground();
+    </script>
     <script>
         const API_URL = 'http://localhost:5000/api';
 
         async function loadApps() {
-            const res = await fetch(`${API_URL}/admin/applications`);
-            const apps = await res.json();
-            const tbody = document.getElementById('appBody');
-            tbody.innerHTML = '';
-            apps.forEach(a => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${a.student_name}</td>
-                        <td>${a.roll_no}</td>
-                        <td>${a.company_name}</td>
-                        <td>${a.role}</td>
-                        <td>${new Date(a.applied_on).toLocaleDateString()}</td>
-                        <td><strong>${a.current_status}</strong></td>
-                        <td>
-                            <select id="status_${a.application_id}">
-                                <option value="Round 1 Cleared">Round 1 Cleared</option>
-                                <option value="Round 2 Cleared">Round 2 Cleared</option>
-                                <option value="Rejected">Rejected</option>
-                                <option value="Offered">Offered</option>
-                            </select>
-                            <button onclick="updateStatus(${a.application_id})">Save</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            try {
+                const res = await fetch(`${API_URL}/admin/applications`);
+                const apps = await res.json();
+                const tbody = document.getElementById('appBody');
+                tbody.innerHTML = '';
+                
+                if(apps.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='7' class='p-8 text-center text-gray-500'>No active candidate transmissions detected.</td></tr>";
+                    return;
+                }
+
+                apps.forEach(a => {
+                    let statusColor = 'text-indigo-300';
+                    if(a.current_status === 'Offered') statusColor = 'text-emerald-400 font-bold';
+                    else if(a.current_status === 'Rejected') statusColor = 'text-red-400';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-white/5 transition-colors group">
+                            <td class="p-4 font-medium group-hover:text-white transition-colors"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div>${a.student_name}</div></td>
+                            <td class="p-4 font-mono text-gray-400">${a.roll_no}</td>
+                            <td class="p-4 font-medium">${a.company_name}</td>
+                            <td class="p-4 text-sm">${a.role}</td>
+                            <td class="p-4 font-mono text-xs">${new Date(a.applied_on).toLocaleDateString()}</td>
+                            <td class="p-4 uppercase tracking-widest text-xs ${statusColor}">${a.current_status}</td>
+                            <td class="p-4 text-right">
+                                <div class="flex gap-2 justify-end">
+                                    <select id="status_${a.application_id}" class="glass-input !py-1 !px-2 text-xs bg-black text-white w-32 focus:!ring-indigo-500/50">
+                                        <option value="Applied">Applied</option>
+                                        <option value="Round 1 Cleared">Round 1 Cleared</option>
+                                        <option value="Round 2 Cleared">Round 2 Cleared</option>
+                                        <option value="Rejected">Rejected</option>
+                                        <option value="Offered">Offered</option>
+                                    </select>
+                                    <button onclick="updateStatus(${a.application_id})" class="glass-btn !py-1 !px-3 font-semibold !text-xs !w-auto">EXECUTE</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                document.getElementById('appBody').innerHTML = "<tr><td colspan='7' class='p-8 text-center text-red-500'>Link to core server lost. Data unavailable.</td></tr>";
+            }
         }
 
-        async function updateStatus(id) {
+        window.updateStatus = async function(id) {
             const status = document.getElementById('status_'+id).value;
             try {
                 const res = await fetch(`${API_URL}/admin/application/${id}/status`, {
@@ -74,10 +103,10 @@
                     body: JSON.stringify({status})
                 });
                 if(res.ok) {
-                    alert('Status Updated!');
+                    // Update UI optimistically or reload apps
                     loadApps();
-                } else alert('Failed to update');
-            } catch(e) { alert('Internal Error'); }
+                } else alert('Override access denied.');
+            } catch(e) { alert('Transmission failed.'); }
         }
 
         loadApps();

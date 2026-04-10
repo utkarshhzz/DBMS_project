@@ -3,34 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>My Applications</title>
-    
-    
-
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="pt-24">
     <div class="nav">
         <strong>Track Applications</strong>
         <div>
             <a href="dashboard.html">Browse Drives</a>
-            <a href="my-applications.html">My Applications</a>
-            <a onclick="logout()">Logout</a>
+            <a href="my-applications.html" class="!text-cyan-400">My Applications</a>
+            <a onclick="logout()" class="!text-red-400 hover:!text-red-300">Logout</a>
         </div>
     </div>
 
-    <h2>My Applications Pipeline</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Company</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Applied On</th>
-            </tr>
-        </thead>
-        <tbody id="app-body"></tbody>
-    </table>
+    <div class="max-w-6xl mx-auto px-6 pb-12 relative z-10">
+        <h2 class="text-3xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-500">My Applications Pipeline</h2>
+        
+        <div class="glass-panel overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr>
+                        <th class="p-5 font-bold text-cyan-300 uppercase tracking-widest text-sm border-b border-white/10">Company</th>
+                        <th class="p-5 font-bold text-cyan-300 uppercase tracking-widest text-sm border-b border-white/10">Role</th>
+                        <th class="p-5 font-bold text-cyan-300 uppercase tracking-widest text-sm border-b border-white/10">Status</th>
+                        <th class="p-5 font-bold text-cyan-300 uppercase tracking-widest text-sm border-b border-white/10">Applied On</th>
+                    </tr>
+                </thead>
+                <tbody id="app-body" class="divide-y divide-white/5 text-gray-300">
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-cyan-300 animate-pulse tracking-widest">
+                            <div class="flex justify-center mb-2">
+                                <div class="h-6 w-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                            RETRIEVING DATA...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+    <script type="module">
+        import { initThreeBackground } from './three-bg.js';
+        initThreeBackground();
+    </script>
     <script>
         const studentRollNo = localStorage.getItem('rollNo');
         if(!localStorage.getItem('token')) window.location.href = 'index.html';
@@ -46,25 +61,30 @@
                 tbody.innerHTML = ''; 
 
                 if(apps.length === 0) {
-                    tbody.innerHTML = "<tr><td colspan='4'>You haven't applied to any drives yet.</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='4' class='p-8 text-center text-gray-400'>No application transmission records found.</td></tr>";
                     return;
                 }
 
                 apps.forEach(app => {
                     const tr = document.createElement('tr');
-                    // In a real app we'd fetch company name & role via JOIN, but our backend route applications.js didn't join them. 
-                    // Let's fix that! Wait, we actually need to fix the backend route to JOIN drives and companies.
-                    // For now, we assume the backend returns company_name and role.
+                    tr.className = 'hover:bg-white/5 transition-colors group';
+                    
+                    let statusColor = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+                    if (app.current_status === 'Selected') statusColor = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+                    else if (app.current_status === 'Rejected') statusColor = 'bg-red-500/20 text-red-400 border-red-500/30';
+
                     tr.innerHTML = `
-                        <td>${app.company_name || 'N/A'}</td>
-                        <td>${app.role || 'N/A'}</td>
-                        <td><span class="status-badge">${app.current_status}</span></td>
-                        <td>${new Date(app.applied_on).toLocaleDateString()}</td>
+                        <td class="p-5 font-medium group-hover:text-white transition-colors">${app.company_name || 'N/A'}</td>
+                        <td class="p-5 text-gray-400 group-hover:text-gray-300">${app.role || 'N/A'}</td>
+                        <td class="p-5"><span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${statusColor}">${app.current_status}</span></td>
+                        <td class="p-5 font-mono text-sm">${new Date(app.applied_on).toLocaleDateString()}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
                 console.error(error);
+                const tbody = document.getElementById('app-body');
+                tbody.innerHTML = "<tr><td colspan='4' class='p-8 text-center text-red-400'>Error retrieving data from core server.</td></tr>";
             }
         }
 

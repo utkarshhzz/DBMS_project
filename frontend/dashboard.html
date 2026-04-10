@@ -3,24 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Student Dashboard</title>
-    
-    
-
     <link rel="stylesheet" href="style.css">
+    <!-- Add GSAP for scrolling animations later if needed -->
 </head>
-<body>
+<body class="pt-24"> <!-- pt-24 to offset fixed nav -->
+    
     <div class="nav">
         <strong id="welcomeUser">Student Dashboard</strong>
         <div>
-            <a href="dashboard.html">Browse Drives</a>
+            <a href="dashboard.html" class="!text-cyan-400">Browse Drives</a>
             <a href="my-applications.html">My Applications</a>
-            <a onclick="logout()">Logout</a>
+            <a onclick="logout()" class="!text-red-400 hover:!text-red-300">Logout</a>
         </div>
     </div>
 
-    <h2>Eligible Placement Drives</h2>
-    <div id="drives-container">Loading...</div>
+    <div class="max-w-6xl mx-auto px-6 pb-12 relative z-10">
+        <h2 class="text-3xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">Eligible Placement Drives</h2>
+        
+        <div id="drives-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="glass-panel p-8 text-center col-span-full">
+                <div class="animate-pulse flex flex-col items-center">
+                    <div class="h-10 w-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-cyan-300 tracking-widest font-medium">SCANNING SYSTEM FOR OPPORTUNITIES...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script type="module">
+        import { initThreeBackground } from './three-bg.js';
+        
+        // Initialize background to keep the 3D aesthetic consistent across pages
+        initThreeBackground();
+    </script>
     <script>
         const studentRollNo = localStorage.getItem('rollNo');
         const token = localStorage.getItem('token');
@@ -29,7 +44,7 @@
             window.location.href = 'index.html';
         }
         
-        document.getElementById('welcomeUser').textContent = 'Welcome, ' + localStorage.getItem('name');
+        document.getElementById('welcomeUser').textContent = localStorage.getItem('name') || 'Student';
 
         function logout() {
             localStorage.clear();
@@ -45,27 +60,47 @@
                 container.innerHTML = ''; 
 
                 if(drives.length === 0) {
-                    container.innerHTML = "<p>No new eligible drives to apply for right now.</p>";
+                    container.innerHTML = `<div class="glass-panel p-8 text-center col-span-full">
+                        <p class="text-gray-400 text-lg">No active placement drives found matching your criteria.</p>
+                    </div>`;
                     return;
                 }
 
                 drives.forEach(drive => {
                     const card = document.createElement('div');
-                    card.className = 'card';
+                    card.className = 'card relative overflow-hidden group';
+                    
+                    // Add decorative gradient bg element
                     card.innerHTML = `
-                        <h3>${drive.company_name} - ${drive.role}</h3>
-                        <p><strong>Package:</strong> ${drive.package_lpa || 'TBD'} LPA | <strong>Deadline:</strong> ${new Date(drive.deadline).toLocaleDateString()}</p>
-                        <button class="apply-btn" onclick="applyForDrive(${drive.drive_id})">Apply Now</button>
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all duration-500 z-0"></div>
+                        <div class="relative z-10">
+                            <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">${drive.company_name}</h3>
+                            <h4 class="text-cyan-400 font-medium mb-3">${drive.role}</h4>
+                            <div class="space-y-2 mb-6 text-sm text-gray-300">
+                                <p class="flex justify-between border-b border-white/5 pb-1">
+                                    <span class="text-gray-500">Package</span>
+                                    <span class="font-mono text-emerald-400">${drive.package_lpa ? drive.package_lpa + ' LPA' : 'TBD'}</span>
+                                </p>
+                                <p class="flex justify-between border-b border-white/5 pb-1">
+                                    <span class="text-gray-500">Deadline</span>
+                                    <span class="font-mono">${new Date(drive.deadline).toLocaleDateString()}</span>
+                                </p>
+                            </div>
+                            <button class="glass-btn !py-2 !text-sm" onclick="applyForDrive(${drive.drive_id})">Transmit Application</button>
+                        </div>
                     `;
                     container.appendChild(card);
                 });
             } catch (error) {
                 console.error(error);
-                document.getElementById('drives-container').innerHTML = "<p>Error loading drives.</p>";
+                document.getElementById('drives-container').innerHTML = `
+                <div class="glass-panel p-8 text-center col-span-full border-red-500/30">
+                    <p class="text-red-400">Connection to core server failed. Unable to fetch drives.</p>
+                </div>`;
             }
         }
 
-        async function applyForDrive(driveId) {
+        window.applyForDrive = async function(driveId) {
             try {
                 const response = await fetch('http://localhost:5000/api/applications/apply', {
                     method: 'POST',
@@ -74,11 +109,14 @@
                 });
 
                 if(response.ok) {
-                    alert("Application Submitted!");
+                    alert("Application Transmitted Successfully!");
                     fetchDrives(); 
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Transmission Failed.");
                 }
             } catch (error) {
-                alert("Failed to apply.");
+                alert("Core server connection error.");
             }
         }
 

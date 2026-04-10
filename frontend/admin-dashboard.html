@@ -2,67 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    
-    
-
+    <title>TPO Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="nav">
-        <strong>TPO Admin Dashboard</strong>
+<body class="pt-24">
+    <div class="nav border-b border-indigo-500/30 shadow-[0_4px_30px_rgba(79,70,229,0.2)]">
+        <strong class="!from-indigo-400 !to-purple-500">TPO OVERSEER</strong>
         <div>
-            <a href="admin-dashboard.html" style="color: white; margin-right: 15px;">Drives & Stats</a>
-            <a href="admin-manage.html" style="color: white; margin-right: 15px;">Manage Applications</a>
-            <a href="index.html" style="color: white;">Logout</a>
+            <a href="admin-dashboard.html" class="!text-indigo-400 font-bold">Drives & Stats</a>
+            <a href="admin-manage.html" class="hover:!text-indigo-300">Manage Applications</a>
+            <a href="index.html" class="!text-red-400 hover:!text-red-300 ml-4">Terminal Exit</a>
         </div>
     </div>
 
-    <div style="display: flex; gap: 20px;">
-        <div style="flex: 1;">
-            <h3>Create New Placement Drive</h3>
-            <div class="card">
-                <select id="companySelect">
-                    <option value="">Loading companies...</option>
-                </select>
-                <input type="text" id="dRole" placeholder="Role (e.g. SDE)" required>
-                <input type="number" id="dPackage" placeholder="Package LPA" step="0.1">
-                <input type="number" id="dMinCgpa" placeholder="Minimum CGPA" step="0.1">
-                <input type="text" id="dDepts" placeholder="Allowed Departments (e.g. All, CS, IT)">
-                <input type="date" id="dDeadline" required>
-                <button onclick="createDrive()">Create Drive</button>
+    <div class="max-w-7xl mx-auto px-6 pb-12 relative z-10 flex flex-col lg:flex-row gap-8">
+        
+        <!-- Drive Creation Panel -->
+        <div class="lg:w-1/3">
+            <h3 class="text-2xl font-bold mb-6 text-white border-l-4 border-indigo-500 pl-3">Initialize Drive</h3>
+            <div class="glass-panel p-6 space-y-4 shadow-[0_0_20px_rgba(79,70,229,0.1)]">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Corporate Entity</label>
+                    <select id="companySelect" class="glass-input !py-2 text-sm bg-black text-white">
+                        <option value="" class="text-gray-900">Scanning entities...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Role Designation</label>
+                    <input type="text" id="dRole" placeholder="e.g. SDE-1" class="glass-input !py-2 text-sm" required>
+                </div>
+                
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Package (LPA)</label>
+                        <input type="number" id="dPackage" placeholder="0.0" step="0.1" class="glass-input !py-2 text-sm">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Min CGPA</label>
+                        <input type="number" id="dMinCgpa" placeholder="0.0" step="0.1" class="glass-input !py-2 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Allowed Departments</label>
+                    <input type="text" id="dDepts" placeholder="e.g. All, CS, IT" class="glass-input !py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Transmission Deadline</label>
+                    <input type="date" id="dDeadline" class="glass-input !py-2 text-sm [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" required>
+                </div>
+                
+                <button onclick="createDrive()" class="glass-btn !from-indigo-600 !to-purple-600 mt-4 !shadow-[0_0_15px_rgba(79,70,229,0.4)]">Launch Drive</button>
             </div>
         </div>
-        <div style="flex: 2;">
-            <h3>Drive Statistics</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Role</th>
-                        <th>Applicants</th>
-                        <th>Offers</th>
-                    </tr>
-                </thead>
-                <tbody id="statsBody"></tbody>
-            </table>
+
+        <!-- Telemetry Panel -->
+        <div class="lg:w-2/3">
+            <h3 class="text-2xl font-bold mb-6 text-white border-l-4 border-emerald-500 pl-3">Network Telemetry</h3>
+            <div class="glass-panel overflow-x-auto shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Company</th>
+                            <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Role</th>
+                            <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10">Applicants</th>
+                            <th class="p-4 font-bold text-indigo-300 uppercase tracking-widest text-xs border-b border-white/10 text-emerald-400">Offers Granted</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBody" class="divide-y divide-white/5 text-gray-300">
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-indigo-300 animate-pulse tracking-widest text-sm">
+                                GATHERING SYSTEM TELEMETRY...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <script type="module">
+        import { initThreeBackground } from './three-bg.js';
+        initThreeBackground(); // Shared background across system
+    </script>
     <script>
         const API_URL = 'http://localhost:5000/api';
 
         async function loadCompanies() {
-            const res = await fetch(`${API_URL}/admin/companies`);
-            const companies = await res.json();
-            const select = document.getElementById('companySelect');
-            select.innerHTML = '<option value="">Select Company</option>';
-            companies.forEach(c => {
-                select.innerHTML += `<option value="${c.company_id}">${c.company_name} (${c.industry})</option>`;
-            });
+            try {
+                const res = await fetch(`${API_URL}/admin/companies`);
+                const companies = await res.json();
+                const select = document.getElementById('companySelect');
+                select.innerHTML = '<option value="" class="text-gray-900">Select Corporate Entity</option>';
+                companies.forEach(c => {
+                    select.innerHTML += `<option value="${c.company_id}" class="text-gray-900">${c.company_name} (${c.industry})</option>`;
+                });
+            } catch(e) { console.error(e); }
         }
 
-        async function createDrive() {
+        window.createDrive = async function() {
             const data = {
                 companyId: document.getElementById('companySelect').value,
                 role: document.getElementById('dRole').value,
@@ -73,33 +111,50 @@
             };
             
             try {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = "LAUNCHING...";
+                
                 const res = await fetch(`${API_URL}/admin/drive`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
+                
                 if(res.ok) {
-                    alert('Drive Created!');
+                    alert('Drive Execution Initiated successfully.');
                     loadStats();
-                } else alert('Error creating drive');
-            } catch(e) { alert('Internal Error'); }
+                } else alert('Error executing drive payload.');
+                
+                btn.innerText = originalText;
+            } catch(e) { alert('Internal Protocol Error. Check Connection.'); }
         }
 
         async function loadStats() {
-            const res = await fetch(`${API_URL}/admin/stats`);
-            const stats = await res.json();
-            const tbody = document.getElementById('statsBody');
-            tbody.innerHTML = '';
-            stats.forEach(s => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${s.company_name}</td>
-                        <td>${s.role}</td>
-                        <td>${s.total_applicants}</td>
-                        <td>${s.total_offers}</td>
-                    </tr>
-                `;
-            });
+            try {
+                const res = await fetch(`${API_URL}/admin/stats`);
+                const stats = await res.json();
+                const tbody = document.getElementById('statsBody');
+                tbody.innerHTML = '';
+                
+                if(stats.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='4' class='p-8 text-center text-gray-500'>No telemetry data available.</td></tr>";
+                    return;
+                }
+
+                stats.forEach(s => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 font-medium">${s.company_name}</td>
+                            <td class="p-4 text-indigo-200">${s.role}</td>
+                            <td class="p-4 font-mono">${s.total_applicants}</td>
+                            <td class="p-4 font-mono text-emerald-400 font-bold">${s.total_offers}</td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                document.getElementById('statsBody').innerHTML = "<tr><td colspan='4' class='p-8 text-center text-red-500'>Telemetry retrieval failed.</td></tr>";
+            }
         }
 
         loadCompanies();
